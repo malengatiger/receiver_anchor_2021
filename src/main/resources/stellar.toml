@@ -1,0 +1,68 @@
+#😎 😎 😎 stellar toml file - this is the base that will be updated live 🍎
+ACCOUNTS = ["GANOSADLEDVXAUP7FSGP6XNEFNEAIOA5X2ZGRRDTKSZQEGBGATVB3YZC", "GAXAHVZ6PEJFR4JRPVKDRRTHGDBCVSI2P7HCQBUG2VR3V6ZSFEXMRR34", "GBOUGMT6UASUHOILF5SIPYLS5KZYKZPAYF6ZTZJWAQUST6P2HYYCICEE"]
+SIGNING_KEY = "GBOUGMT6UASUHOILF5SIPYLS5KZYKZPAYF6ZTZJWAQUST6P2HYYCICEE"
+DIRECT_PAYMENT_SERVER = "http://localhost:8099"
+DESIRED_BASE_FEE = 100
+NETWORK_PASSPHRASE = "Public Global Stellar Network ; September 2015"
+WEB_AUTH_ENDPOINT = "http://localhost:8099/auth"
+KYC_SERVER = "http://localhost:8099/kycc"
+DESIRED_MAX_TX_PER_LEDGER = 400
+TRANSFER_SERVER = "http://localhost:8099/"
+VERSION = "2.0.0"
+KNOWN_PEERS = ["192.168.0.1", "core-testnet1.stellar.org", "core-testnet2.stellar.org:11290", "2001:0db8:0100:f101:0210:a4ff:fee3:9566"]
+OUR_VALIDATORS = ["$sdf_watcher2", "GCGB2S2KGYARPVIA37HYZXVRM2YZUEXA6S33ZU5BUDC6THSB62LZSTYH"]
+FEDERATION_SERVER = "http://localhost:8099/federation"
+HORIZON_URL = "https://horizon.domain.com"
+HISTORY = ["http://history.stellar.org/prd/core-live/core_live_001/", "http://history.stellar.org/prd/core-live/core_live_002/", "http://history.stellar.org/prd/core-live/core_live_003/"]
+
+[DOCUMENTATION]
+ORG_PHONE_NUMBER = "1 (123)-456-7890"
+ORG_LOGO = "https://www.domain.com/awesomelogo.png"
+ORG_NAME = "AzaniaAnchor LLC"
+ORG_DBA = "Organization DBA"
+ORG_TWITTER = "orgtweet"
+ORG_DESCRIPTION = "Description of issuer"
+ORG_OFFICIAL_EMAIL = "support@domain.com"
+ORG_KEYBASE = "accountname"
+ORG_GITHUB = "orgcode"
+ORG_PHYSICAL_ADDRESS = "123 East 44th Street, New York, NY 12345, United States"
+ORG_PHONE_NUMBER_ATTESTATION = "https://www.domain.com/phone_attestation.jpg"
+ORG_PHYSICAL_ADDRESS_ATTESTATION = "https://www.domain.com/address_attestation.jpg"
+ORG_URL = "https://www.domain.com"
+
+[[VALIDATORS]]
+ALIAS = "domain-au"
+PUBLIC_KEY = "GD5DJQDDBKGAYNEAXU562HYGOOSYAEOO6AS53PZXBOZGCP5M2OPGMZV3"
+HOST = "core-au.domain.com:11625"
+DISPLAY_NAME = "Domain Australia"
+HISTORY = "http://history.domain.com/prd/core-live/core_live_001/"
+
+[[VALIDATORS]]
+ALIAS = "domain-sg"
+PUBLIC_KEY = "GAENZLGHJGJRCMX5VCHOLHQXU3EMCU5XWDNU4BGGJFNLI2EL354IVBK7"
+HOST = "core-sg.domain.com:11625"
+DISPLAY_NAME = "Domain Singapore"
+HISTORY = "http://history.domain.com/prd/core-live/core_live_002/"
+
+[[VALIDATORS]]
+ALIAS = "domain-us"
+PUBLIC_KEY = "GAOO3LWBC4XF6VWRP5ESJ6IBHAISVJMSBTALHOQM2EZG7Q477UWA6L7U"
+HOST = "core-us.domain.com:11625"
+DISPLAY_NAME = "Domain United States"
+HISTORY = "http://history.domain.com/prd/core-live/core_live_003/"
+
+[[CURRENCIES]]
+info_server = "https://acme.inc/api/v1/asset_info/"
+code = "ZIMDOLLAR"
+display_decimals = 2
+anchor_asset_type = "fiat"
+issuer = "GAXAHVZ6PEJFR4JRPVKDRRTHGDBCVSI2P7HCQBUG2VR3V6ZSFEXMRR34"
+
+[[PRINCIPALS]]
+twitter = "oneconnect_fintech"
+github = "https://github.com/malengatiger"
+verification_photo_hash = "016ba8c4cfde65af99cb5fa8b8a37e2eb73f481b3ae34991666df2e04feb6c038666ebd1ec2b6f623967756033c702dde5f423f7d47ab6ed1827ff53783731f7"
+id_photo_hash = "be688838ca8686e5c90689bf2ab585cef1137c999b48c70b92f67a5c34dc15697b5d11c982ed6d71be1e1e7f7b4e0733884aa97c3f7a339a8ed03577cf74be09"
+name = "OneConnect FinTech"
+keybase = "oneconnect_fintech"
+email = "aubrey@aftarobot.com"
