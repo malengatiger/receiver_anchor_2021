@@ -8,6 +8,7 @@ import com.boha.receiver.services.AccountService;
 import com.boha.receiver.services.FirebaseService;
 import com.boha.receiver.services.TOMLService;
 import com.boha.receiver.services.directpayments.DirectPaymentSenderService;
+import com.boha.receiver.services.misc.NetService;
 import com.boha.receiver.transfer.sep10.AnchorSep10Challenge;
 import com.boha.receiver.transfer.sep10.ChallengeResponse;
 import com.boha.receiver.transfer.sep10.JWTToken;
@@ -22,6 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.boha.receiver.util.E;
 import org.stellar.sdk.requests.ErrorResponse;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @CrossOrigin(maxAge = 3600)
 @RestController
@@ -62,7 +66,7 @@ public class ReceiverController {
         }
     }
 
-    @GetMapping("/startAnchorConnection")
+    @GetMapping(value = "/startAnchorConnection", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> startAnchorConnection(String assetCode)  {
         LOGGER.info(E.BROCCOLI + E.BROCCOLI + "startAnchorConnection starting ...");
 
@@ -109,7 +113,7 @@ public class ReceiverController {
     FirebaseService firebaseService;
 
     private ReceivingAnchor receivingAnchor;
-    @PostMapping(value = "/token", produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/token", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> token(@RequestBody String transaction) throws Exception {
         LOGGER.info(mm+"token endpoint fired up! will try to return token from transaction .........");
         try {
@@ -119,8 +123,8 @@ public class ReceiverController {
             }
             String token = anchorSep10Challenge.getToken(transaction);
             LOGGER.info(mm + "JWT Token returned: ".concat(token).concat(mm));
-            String finalToken = new JWTToken(token).getToken();
-            LOGGER.info(mm + "JWT Token; finalToken returned: ".concat(finalToken).concat(mm));
+            JWTToken finalToken = new JWTToken(token);
+            LOGGER.info(mm + "JWT Token; finalToken returned: ".concat(finalToken.getToken()).concat(mm));
             return ResponseEntity.ok(finalToken);
         } catch (Exception e) {
             String msg = E.ERROR + "Token acquisition failed " + E.ERROR + e.getMessage();
@@ -129,4 +133,5 @@ public class ReceiverController {
                     .body(msg);
         }
     }
+
 }

@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.boha.receiver.util.E;
+
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -66,13 +68,22 @@ public class NetService {
     CloseableHttpClient httpclient = HttpClients.createDefault();
 
 
-    public String get(String url) throws Exception {
+    public String get(String url, String token) throws Exception {
         LOGGER.info(E.DICE.concat(E.DICE).concat(" ... Posting GET to: "
                 .concat(url)));
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
+        Request request;
+        if (token == null) {
+            request = new Request.Builder()
+                    .url(url)
+                    .get()
+                    .build();
+        } else {
+            request = new Request.Builder()
+                    .url(url)
+                    .addHeader("Authorization", "Bearer " + token)
+                    .get()
+                    .build();
+        }
         try {
             Response response = client.newCall(request).execute();
             LOGGER.info("GET returns status code: " + response.code()
@@ -80,7 +91,8 @@ public class NetService {
             if (response.isSuccessful()) {
                 return Objects.requireNonNull(response.body()).string();
             } else {
-                LOGGER.info("GET is NOT OK: status code: " + response.code());
+                LOGGER.info("GET is NOT OK: status code: " + response.code() + " "
+                        + Objects.requireNonNull(response.body()).string());
                 throw new Exception("status code: " + response.code() + " " + response.message());
             }
         } catch (Exception e) {

@@ -8,13 +8,18 @@ import com.boha.receiver.services.directpayments.txresponse.TransactionResponse;
 import com.boha.receiver.services.misc.NetService;
 import com.boha.receiver.transfer.sep10.AnchorSep10Challenge;
 import com.boha.receiver.util.Constants;
+import com.boha.receiver.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.stellar.sdk.KeyPair;
+
+import java.util.HashMap;
+import java.util.Map;
 /*
     🥨 🥨 🥨 Sender Flow 🥨 🥨 🥨
     The Sending Client (user) initiates a direct payment to the Receiving Client.
@@ -72,7 +77,7 @@ public class DirectPaymentSenderService {
             String seed = receivingAnchor.getTestSecret();
             String url = TEST_URL +  "auth?account=" + receivingAnchor.getTestAccount();
             LOGGER.info(bb+"url: " + url);
-            String trans = netService.get(url);
+            String trans = netService.get(url, null);
             AuthResponse authResponse = G.fromJson(trans,AuthResponse.class);
             LOGGER.info(bb+"RECEIVING anchor "+ receivingAnchor.getPhone()+" responded with Transaction: " +
                     bb);
@@ -90,13 +95,29 @@ public class DirectPaymentSenderService {
 
             //todo - The Client submits the signed challenge back to the Server using token endpoint
 
-            String token = netService.post(TEST_URL + "token",
+            String tokenJson = netService.post(TEST_URL + "token",
                     transaction.getTransaction().toEnvelopeXdrBase64());
-            LOGGER.info(" \uD83E\uDD4F\uD83E\uDD4F\uD83E\uDD4F  JWT Token returned: "
+            LOGGER.info(" \uD83E\uDD4F\uD83E\uDD4F\uD83E\uDD4F  JWT Token json returned: "
+                    .concat(tokenJson).concat("  \uD83D\uDD11 \uD83D\uDD11 \uD83D\uDD11"));
+            LOGGER.info(" \uD83E\uDD4F\uD83E\uDD4F\uD83E\uDD4F  Testing ping with new token ....");
+            JSONObject object = new JSONObject(tokenJson);
+            String token = object.getString("token");
+            LOGGER.info(" \uD83E\uDD4F\uD83E\uDD4F\uD83E\uDD4F  JWT Token: "
                     .concat(token).concat("  \uD83D\uDD11 \uD83D\uDD11 \uD83D\uDD11"));
-            return token;
+            testPing(token);
+            return tokenJson;
         } else {
             throw new Exception("\uD83D\uDD25 \uD83D\uDD25 No Receiving Anchor found");
+        }
+    }
+
+    private void testPing(String token) {
+        LOGGER.info(" \uD83E\uDD4F\uD83E\uDD4F\uD83E\uDD4F ............. testPing starting ........... : ");
+        try {
+            String pinged = netService.get("http://localhost:8092/anchor/api/v1/ping", token);
+            LOGGER.info(E.FERN+E.FERN+pinged);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
     public InfoResponse getReceivingAnchorInfo(ReceivingAnchor receivingAnchor) {

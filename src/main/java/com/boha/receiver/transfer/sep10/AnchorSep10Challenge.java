@@ -66,11 +66,11 @@ public class AnchorSep10Challenge {
      */
     public ChallengeResponse newChallenge(String clientAccountId) throws Exception {
         LOGGER.info(emm + "Executing challenge ... to return XDR transaction to caller ... " + emm);
-        ReceivingAnchor anchor = firebaseService.getReceivingAnchor("ZIMDOLLAR");
+        ReceivingAnchor receivingAnchor = firebaseService.getReceivingAnchor("ZIMDOLLAR");
         LOGGER.info(em1 + " " + em1 +"Anchor Account: "
-                .concat(anchor.getTestAccount()).concat(" ").concat(em1));
+                .concat(receivingAnchor.getTestAccount()).concat(" ").concat(em1));
         setServerAndNetwork();
-        KeyPair signerKeyPair = KeyPair.fromSecretSeed(anchor.getTestSecret());
+        KeyPair signerKeyPair = KeyPair.fromSecretSeed(receivingAnchor.getTestSecret());
         TimeBounds bounds = new TimeBounds(new Date().getTime(), new Date().getTime() + EXPIRE_AFTER_N_MINUTES);
 
         byte[] nonce = new byte[48];
@@ -104,13 +104,15 @@ public class AnchorSep10Challenge {
                 .addOperation(operation)
                 .build();
 
+        LOGGER.info(E.FERN+E.FERN+"....... Server about to sign transaction with: "
+                + signerKeyPair.getAccountId());
         transaction.sign(signerKeyPair);
-
         ChallengeResponse challengeResponse = new ChallengeResponse(
                 transaction.toEnvelopeXdrBase64(),
                 network.getNetworkPassphrase());
 
-        LOGGER.info("\n" + emm + "Challenge Transaction created, "+em2+" signed by anchor distribution account and converted to "
+        LOGGER.info("\n" + emm + "Challenge Transaction created, "+em2+" " +
+                "signed by receivingAnchor test account and converted to "
                 +em2+"XDR "+em2+"... we done good, Boss! " + em1);
         LOGGER.info(E.HAND1.concat(E.HAND2.concat(E.HAND3))
                 .concat("ChallengeResponse returned to caller: ") + E.LEAF
