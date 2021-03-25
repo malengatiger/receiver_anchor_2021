@@ -1,6 +1,5 @@
 package com.boha.receiver.services.directpayments;
 
-import com.boha.receiver.data.Anchor;
 import com.boha.receiver.data.ReceivingAnchor;
 import com.boha.receiver.services.FirebaseService;
 import com.boha.receiver.services.directpayments.inforesponse.InfoResponse;
@@ -17,9 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.stellar.sdk.KeyPair;
-
-import java.util.HashMap;
-import java.util.Map;
 /*
     🥨 🥨 🥨 Sender Flow 🥨 🥨 🥨
     The Sending Client (user) initiates a direct payment to the Receiving Client.
@@ -104,15 +100,15 @@ public class DirectPaymentSenderService {
             String token = object.getString("token");
             LOGGER.info(" \uD83E\uDD4F\uD83E\uDD4F\uD83E\uDD4F  JWT Token: "
                     .concat(token).concat("  \uD83D\uDD11 \uD83D\uDD11 \uD83D\uDD11"));
-            testPing(token);
+            testPingWithAuthentication(token);
             return tokenJson;
         } else {
             throw new Exception("\uD83D\uDD25 \uD83D\uDD25 No Receiving Anchor found");
         }
     }
 
-    private void testPing(String token) {
-        LOGGER.info(" \uD83E\uDD4F\uD83E\uDD4F\uD83E\uDD4F ............. testPing starting ........... : ");
+    private void testPingWithAuthentication(String token) {
+        LOGGER.info(" \uD83E\uDD4F\uD83E\uDD4F\uD83E\uDD4F ............. testPingWithAuthentication starting ........... : ");
         try {
             String pinged = netService.get("http://localhost:8092/anchor/api/v1/ping", token);
             LOGGER.info(E.FERN+E.FERN+pinged);
