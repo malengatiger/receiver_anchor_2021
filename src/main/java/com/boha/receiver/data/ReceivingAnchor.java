@@ -3,8 +3,24 @@ package com.boha.receiver.data;
 public class ReceivingAnchor {
     String anchorId, bankAccountNumber, routingNumber, countryCode, countryName;
     String dateRegistered, dateUpdated;
-    String directPaymentsURL;
+    String directPaymentsURL, testAccount, testSecret;
     String name, signingKey, email, phone, assetCode, issuer;
+
+    public String getTestAccount() {
+        return testAccount;
+    }
+
+    public void setTestAccount(String testAccount) {
+        this.testAccount = testAccount;
+    }
+
+    public String getTestSecret() {
+        return testSecret;
+    }
+
+    public void setTestSecret(String testSecret) {
+        this.testSecret = testSecret;
+    }
 
     public String getIssuer() {
         return issuer;

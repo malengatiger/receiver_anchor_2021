@@ -1,4 +1,4 @@
-package com.boha.receiver.directpayments.inforesponse;
+package com.boha.receiver.services.directpayments.inforesponse;
 /*
 {
   "receive":{

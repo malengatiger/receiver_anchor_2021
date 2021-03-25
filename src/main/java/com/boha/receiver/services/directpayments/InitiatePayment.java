@@ -1,6 +1,6 @@
-package com.boha.receiver.directpayments;
+package com.boha.receiver.services.directpayments;
 
-import com.boha.receiver.directpayments.inforesponse.Fields;
+import com.boha.receiver.services.directpayments.inforesponse.Fields;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

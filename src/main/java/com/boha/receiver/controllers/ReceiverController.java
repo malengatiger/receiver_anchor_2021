@@ -7,6 +7,7 @@ import com.boha.receiver.data.ReceivingAnchor;
 import com.boha.receiver.services.AccountService;
 import com.boha.receiver.services.FirebaseService;
 import com.boha.receiver.services.TOMLService;
+import com.boha.receiver.services.directpayments.DirectPaymentSenderService;
 import com.boha.receiver.transfer.sep10.AnchorSep10Challenge;
 import com.boha.receiver.transfer.sep10.ChallengeResponse;
 import com.boha.receiver.transfer.sep10.JWTToken;
@@ -38,11 +39,14 @@ public class ReceiverController {
     private AccountService accountService;
 
     @Autowired
+    private DirectPaymentSenderService directPaymentSenderService;
+
+    @Autowired
     private TOMLService tomlService;
 
     @GetMapping(value = "/ping", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CustomMessage>  ping() {
-       String c = mm+"Dummy Anchor getting pinged: " + new DateTime().toDateTimeISO().toString();
+    public ResponseEntity<Object>  ping() {
+       String c = mm+"Receiving Anchor getting pinged: " + new DateTime().toDateTimeISO().toString();
        LOGGER.info(c);
        return ResponseEntity.ok(new CustomMessage(200,c));
     }
@@ -57,6 +61,22 @@ public class ReceiverController {
             throw new Exception("stellar.toml missing");
         }
     }
+
+    @GetMapping("/startAnchorConnection")
+    public ResponseEntity<?> startAnchorConnection(String assetCode)  {
+        LOGGER.info(E.BROCCOLI + E.BROCCOLI + "startAnchorConnection starting ...");
+
+        try {
+            String res = directPaymentSenderService.startAnchorConnection(assetCode);
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(new CustomMessage(400,
+                    "startAnchorConnection failed: " + e.getMessage()));
+        }
+
+    }
+
 
     @GetMapping(value = "/createAnchorAccounts", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createAnchorAccounts(@RequestParam String fundingSeed) {

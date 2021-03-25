@@ -95,6 +95,25 @@ public class FirebaseService {
         }
         return null;
     }
+    public Anchor getAnchor() throws Exception {
+        Firestore fs = FirestoreClient.getFirestore();
+        ApiFuture<QuerySnapshot> future = fs.collection(Constants.ANCHORS)
+                .limit(1)
+                .get();
+        int cnt = 0;
+        Anchor anchor;
+        for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+            Map<String, Object> map = document.getData();
+            String object = G.toJson(map);
+            anchor = G.fromJson(object, Anchor.class);
+            cnt++;
+            LOGGER.info("\uD83C\uDF51 \uD83C\uDF51 REAL ANCHOR: #" + cnt +
+                    " \uD83D\uDC99 " + anchor.getName() + "  \uD83E\uDD66 anchorId: "
+                    + anchor.getAnchorId());
+            return anchor;
+        }
+        return null;
+    }
     public ReceivingAnchor getReceivingAnchor(String assetCode) throws Exception {
         Firestore fs = FirestoreClient.getFirestore();
         ApiFuture<QuerySnapshot> future = fs.collection(Constants.RECEIVING_ANCHORS)

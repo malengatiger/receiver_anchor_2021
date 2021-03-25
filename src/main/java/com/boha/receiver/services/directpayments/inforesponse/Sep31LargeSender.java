@@ -1,19 +1,19 @@
-package com.boha.receiver.directpayments.inforesponse;
+package com.boha.receiver.services.directpayments.inforesponse;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-public class Sep31ForeignSender implements Serializable {
-    public Sep31ForeignSender(String description) {
+public class Sep31LargeSender implements Serializable {
+    public Sep31LargeSender(String description) {
         this.description = description;
     }
 
     @SerializedName("description")
     @Expose
     private String description;
-    private final static long serialVersionUID = -6102719134088462119L;
+    private final static long serialVersionUID = 1574639141882117063L;
 
     public String getDescription() {
         return description;

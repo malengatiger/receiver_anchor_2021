@@ -1,7 +1,10 @@
 package com.boha.receiver.util;
 
 import com.boha.receiver.services.FirebaseService;
-import com.boha.receiver.transfer.sep10.JWTokenService;
+import com.boha.receiver.services.JWTokenService;
+import com.google.api.core.ApiFuture;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
 import com.moandjiezana.toml.Toml;
 import io.jsonwebtoken.Claims;
 import org.jetbrains.annotations.NotNull;
@@ -55,6 +58,7 @@ public class AnchorAuthenticationFilter extends OncePerRequestFilter {
         //todo - figure out how to secure the upload endpoints - maybe get auth token from firebaseAdmin sdk?
         if (url.contains("auth")
                 || url.contains("token")
+                || url.contains("startAnchorConnection")
                 || url.contains("createAnchorAccounts")) {
             LOGGER.info(E.ANGRY + "this request is not subject to authentication: "
                     + E.HAND2 + url);
@@ -69,6 +73,17 @@ public class AnchorAuthenticationFilter extends OncePerRequestFilter {
             LOGGER.info(E.PEAR + E.PEAR + "Header: " + name + " - " + val);
 
         }
+
+        String token = getToken(httpServletRequest);
+        LOGGER.info("\uD83D\uDE21 Authentication token retrieved: " + token);
+        boolean verifiedToken = verifyToken(httpServletRequest, httpServletResponse, filterChain, url, token);
+        LOGGER.info(E.PEAR + E.PEAR + E.PEAR + "Token verified: " + verifiedToken);
+        if (verifiedToken) {
+            doFilter(httpServletRequest,httpServletResponse,filterChain);
+        }
+
+    }
+    private String getToken(@NotNull HttpServletRequest httpServletRequest) throws ServletException {
         String m = httpServletRequest.getHeader("Authorization");
         if (m == null) {
             String msg = "\uD83D\uDD06 \uD83D\uDD06 \uD83D\uDD06 " +
@@ -84,17 +99,27 @@ public class AnchorAuthenticationFilter extends OncePerRequestFilter {
             LOGGER.info(msg);
             throw new ServletException(msg);
         }
-        String token = m.substring(7);
-        LOGGER.info("\uD83D\uDE21 \uD83D\uDE21 Authentication token retrieved: " + token);
-        try {
-//            ApiFuture<FirebaseToken> future = FirebaseAuth.getInstance().verifyIdTokenAsync(token, true);
-//            FirebaseToken mToken = future.get();
-//            String uid = mToken.getUid();
+        return m.substring(7);
+    }
 
-//            LOGGER.info("\uD83D\uDE21 Authentication for request executed, uid: "
-//                    + mToken.getUid() + " \uD83D\uDE21 email: " + mToken.getEmail()
-//                    + "  \uD83C\uDF38 isEmailVerified: " + mToken.isEmailVerified() + "  \uD83C\uDF38" +
-//                    " - going on to do the filter - \uD83C\uDF4E request has been authenticated OK; \uD83C\uDF4E user uid: " + uid);
+    private boolean verifyToken(@NotNull HttpServletRequest httpServletRequest, @NotNull HttpServletResponse httpServletResponse, @NotNull FilterChain filterChain, String url, String token) throws ServletException {
+        try {
+            try {
+                ApiFuture<FirebaseToken> future = FirebaseAuth.getInstance().verifyIdTokenAsync(token, true);
+                FirebaseToken mToken = future.get();
+                String uid = mToken.getUid();
+                LOGGER.info("\uD83D\uDE21 Authentication for request executed, uid: "
+                        + mToken.getUid() + " \uD83D\uDE21 email: " + mToken.getEmail()
+                        + "  \uD83C\uDF38 isEmailVerified: " + mToken.isEmailVerified() + "  \uD83C\uDF38" +
+                        " - going on to do the filter - \uD83C\uDF4E request has been authenticated OK; \uD83C\uDF4E user uid: " + uid);
+                doFilter(httpServletRequest, httpServletResponse, filterChain);
+                return true;
+            } catch (Exception e) {
+                LOGGER.info("\uD83D\uDD25 \uD83D\uDD25 " +
+                        "this auth request may not be from our Firebase auth users: " + url);
+            }
+            LOGGER.info("😡 😡 how do we verify that this is our Platform Stellar based token ..... ?? 😡 😡");
+
             Claims claims = tokenService.decodeJWT(token);
             LOGGER.info("\n " + E.FLOWER_YELLOW +
                     "Claims: JWT issuer: " + claims.getIssuer() + "\n " +
@@ -112,16 +137,16 @@ public class AnchorAuthenticationFilter extends OncePerRequestFilter {
             if (!char1.contains("G")) {
                 throw new Exception("Bad Key");
             }
-
-            doFilter(httpServletRequest, httpServletResponse, filterChain);
-
+            LOGGER.info("😡 😡 how do we verify that this is our token? WE GOOD! \uD83C\uDF50 \uD83C\uDF50");
+            //todo - what other check is made of the claims? we have a Stellar accountId in claims
+            return true;
         } catch (Exception e) {
             String msg = "\uD83D\uDD06 \uD83D\uDD06 \uD83D\uDD06 " +
-                    "AuthException happened: \uD83C\uDF4E " + e.getMessage();
+                    "Authorization Exception happened: \uD83C\uDF4E " + e.getMessage();
+            e.printStackTrace();
             LOGGER.info(msg);
             throw new ServletException(msg);
         }
-
     }
 
     private void doFilter(@NotNull HttpServletRequest httpServletRequest,

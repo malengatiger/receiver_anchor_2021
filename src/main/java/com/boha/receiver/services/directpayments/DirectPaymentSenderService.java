@@ -1,15 +1,20 @@
-package com.boha.receiver.directpayments;
+package com.boha.receiver.services.directpayments;
 
-
+import com.boha.receiver.data.Anchor;
+import com.boha.receiver.data.ReceivingAnchor;
+import com.boha.receiver.services.FirebaseService;
+import com.boha.receiver.services.directpayments.inforesponse.InfoResponse;
+import com.boha.receiver.services.directpayments.txresponse.TransactionResponse;
+import com.boha.receiver.services.misc.NetService;
+import com.boha.receiver.transfer.sep10.AnchorSep10Challenge;
 import com.boha.receiver.util.Constants;
-import com.boha.receiver.directpayments.inforesponse.InfoResponse;
-import com.boha.receiver.directpayments.txresponse.TransactionResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.boha.receiver.util.E;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.stellar.sdk.KeyPair;
 /*
     🥨 🥨 🥨 Sender Flow 🥨 🥨 🥨
     The Sending Client (user) initiates a direct payment to the Receiving Client.
@@ -42,16 +47,57 @@ import org.springframework.stereotype.Service;
 public class DirectPaymentSenderService {
     public static final Logger LOGGER = LoggerFactory.getLogger(DirectPaymentSenderService.class.getSimpleName());
     private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
-    private static final String mm = E.RED_DOT+E.RED_DOT+"DirectPaymentSenderService: ";
+    private static final String mm = "\uD83C\uDF50 \uD83C\uDF50 \uD83C\uDF50 DirectPaymentSenderService: ";
 
     public DirectPaymentSenderService() {
         LOGGER.info(mm +
                 "constructed and ready to talk to other anchors!");
     }
+    @Autowired
+    FirebaseService firebaseService;
+
+    @Autowired
+    AnchorSep10Challenge anchorSep10Challenge;
+
+    @Autowired
+    NetService netService;
+    public static final String bb = "\uD83C\uDF50 \uD83C\uDF50 \uD83C\uDF50 \uD83C\uDF50";
+
+    public static final String TEST_URL = "http://192.168.86.240:8092/anchor/api/v1/";
+    public String startAnchorConnection(String assetCode) throws Exception {
+
+        com.boha.receiver.data.ReceivingAnchor receivingAnchor = firebaseService.getReceivingAnchor(assetCode);
+        if (receivingAnchor != null) {
+            LOGGER.info(bb+G.toJson(receivingAnchor));
+            String seed = receivingAnchor.getTestSecret();
+            String url = TEST_URL +  "auth?account=" + receivingAnchor.getTestAccount();
+            LOGGER.info(bb+"url: " + url);
+            String trans = netService.get(url);
+            AuthResponse authResponse = G.fromJson(trans,AuthResponse.class);
+            LOGGER.info(bb+"RECEIVING anchor "+ receivingAnchor.getPhone()+" responded with Transaction: " +
+                    bb);
+
+            AnchorSep10Challenge.ChallengeTransaction transaction = anchorSep10Challenge.readChallengeTransaction(authResponse.transaction);
+            LOGGER.info(bb+"RECEIVING anchor ChallengeTransaction acquired, ClientAccountId: " + transaction.getClientAccountId());
+            LOGGER.info(bb+"RECEIVING anchor ChallengeTransaction acquired, SourceAccount: " + transaction.getTransaction().getSourceAccount());
+            KeyPair keyPair = KeyPair.fromSecretSeed(seed);
+
+            LOGGER.info(bb+"... will be Signing ChallengeTransaction from other Anchor .... keyPair.getAccountId: " + keyPair.getAccountId());
+            transaction.getTransaction().sign(keyPair);
+            LOGGER.info(bb+
+                    "AnchorSep10Challenge.ChallengeTransaction has been signed with distribution keyPair! \uD83C\uDF4E YES!! " );
 
 
-    public void authenticate(ReceivingAnchor receivingAnchor) {
+            //todo - The Client submits the signed challenge back to the Server using token endpoint
 
+            String token = netService.post(TEST_URL + "token",
+                    transaction.getTransaction().toEnvelopeXdrBase64());
+            LOGGER.info(" \uD83E\uDD4F\uD83E\uDD4F\uD83E\uDD4F  JWT Token returned: "
+                    .concat(token).concat("  \uD83D\uDD11 \uD83D\uDD11 \uD83D\uDD11"));
+            return token;
+        } else {
+            throw new Exception("\uD83D\uDD25 \uD83D\uDD25 No Receiving Anchor found");
+        }
     }
     public InfoResponse getReceivingAnchorInfo(ReceivingAnchor receivingAnchor) {
         //👽👽 GET DIRECT_PAYMENT_SERVER/info
@@ -69,7 +115,7 @@ public class DirectPaymentSenderService {
     public InitiatePaymentResponse startPayment(InitiatePayment initiatePayment, String url) {
         //POST DIRECT_PAYMENT_SERVER/transactions
         //Content-Type: application/json
-        LOGGER.info(mm+"Initiate talk with other anchor ...." + G.toJson(initiatePayment) + E.BLUE_THINGY);
+        LOGGER.info(mm+"Initiate talk with other anchor ...." + G.toJson(initiatePayment) );
         //todo -  The Sending Anchor identifies the Receiving Anchor it will use for the payment based on the recipient's location and desired currency. ????
         //todo -  May need to create model PartnerAnchor to hold location and currency
 

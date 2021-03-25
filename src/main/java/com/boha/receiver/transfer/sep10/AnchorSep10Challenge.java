@@ -5,6 +5,7 @@ package com.boha.receiver.transfer.sep10;
 import com.boha.receiver.data.Anchor;
 import com.boha.receiver.data.ReceivingAnchor;
 import com.boha.receiver.services.FirebaseService;
+import com.boha.receiver.services.JWTokenService;
 import com.google.common.base.Objects;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -65,11 +66,11 @@ public class AnchorSep10Challenge {
      */
     public ChallengeResponse newChallenge(String clientAccountId) throws Exception {
         LOGGER.info(emm + "Executing challenge ... to return XDR transaction to caller ... " + emm);
-        anchor = firebaseService.getDummyAnchor();
-        LOGGER.info(em1 + " " + em1 +"DistributionStellarAccount: "
-                .concat(anchor.getDistributionStellarAccount().getAccountId()).concat(" ").concat(em1));
+        ReceivingAnchor anchor = firebaseService.getReceivingAnchor("ZIMDOLLAR");
+        LOGGER.info(em1 + " " + em1 +"Anchor Account: "
+                .concat(anchor.getTestAccount()).concat(" ").concat(em1));
         setServerAndNetwork();
-        KeyPair signer = KeyPair.fromSecretSeed(anchor.getDistributionStellarAccount().getSecret());
+        KeyPair signerKeyPair = KeyPair.fromSecretSeed(anchor.getTestSecret());
         TimeBounds bounds = new TimeBounds(new Date().getTime(), new Date().getTime() + EXPIRE_AFTER_N_MINUTES);
 
         byte[] nonce = new byte[48];
@@ -92,7 +93,7 @@ public class AnchorSep10Challenge {
                 +em2 +clientAccount.getAccountId()+ em2);
 
         String key = "A" + System.currentTimeMillis() + " auth";
-        Account sourceAccount = new Account(signer.getAccountId(), -1L);
+        Account sourceAccount = new Account(signerKeyPair.getAccountId(), -1L);
         ManageDataOperation operation = new ManageDataOperation.Builder(key, encodedNonce)
                 .setSourceAccount(clientAccountId)
                 .build();
@@ -103,7 +104,7 @@ public class AnchorSep10Challenge {
                 .addOperation(operation)
                 .build();
 
-        transaction.sign(signer);
+        transaction.sign(signerKeyPair);
 
         ChallengeResponse challengeResponse = new ChallengeResponse(
                 transaction.toEnvelopeXdrBase64(),
@@ -125,8 +126,11 @@ public class AnchorSep10Challenge {
 
         setServerAndNetwork();
         ChallengeTransaction challengeTransaction;
+        ReceivingAnchor anchor = firebaseService.getReceivingAnchor("ZIMDOLLAR");
         try {
+            KeyPair keyPair = KeyPair.fromSecretSeed(anchor.getTestSecret());
             challengeTransaction = readChallengeTransaction(transaction);
+            challengeTransaction.getTransaction().sign(keyPair);
         } catch (Exception e) {
             String msg = "readChallengeTransaction failed: ".concat(E.ERROR) + e.getMessage();
             LOGGER.info(E.ERROR + msg);

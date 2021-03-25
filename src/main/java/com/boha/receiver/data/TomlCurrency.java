@@ -1,6 +1,5 @@
 package com.boha.receiver.data;
 
-import com.boha.receiver.directpayments.inforesponse.Fields;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

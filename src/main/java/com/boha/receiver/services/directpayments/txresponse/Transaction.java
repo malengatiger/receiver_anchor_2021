@@ -1,4 +1,4 @@
-package com.boha.receiver.directpayments.txresponse;
+package com.boha.receiver.services.directpayments.txresponse;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
