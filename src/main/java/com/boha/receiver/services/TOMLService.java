@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -132,7 +133,7 @@ public class TOMLService {
 
     }
 
-    private File getStellarTomlFile() throws IOException {
+    public File getStellarTomlFile() throws IOException {
         LOGGER.info(E.BLUE_THINGY + E.BLUE_THINGY + E.BLUE_THINGY + E.BLUE_THINGY +
                 "getStellarTomlFile: ");
         File file = new File("stellar.toml");
@@ -149,5 +150,9 @@ public class TOMLService {
         }
     }
 
+    public String getStellarTOMLString() throws  Exception {
+        File file = getStellarTomlFile();
+        return Files.readString(Paths.get(file.getAbsolutePath()));
+    }
 
 }

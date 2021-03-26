@@ -66,8 +66,8 @@ public class DirectPaymentSenderService {
 
     public static final String TEST_URL = "http://192.168.86.240:8092/anchor/api/v1/";
     public String startAnchorConnection(String assetCode) throws Exception {
-
-        com.boha.receiver.data.ReceivingAnchor receivingAnchor = firebaseService.getReceivingAnchor(assetCode);
+        com.boha.receiver.data.ReceivingAnchor receivingAnchor =
+                firebaseService.getReceivingAnchor(assetCode);
         if (receivingAnchor != null) {
             LOGGER.info(bb+G.toJson(receivingAnchor));
             String seed = receivingAnchor.getTestSecret();

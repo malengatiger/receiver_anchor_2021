@@ -8,10 +8,16 @@ import com.boha.receiver.services.AccountService;
 import com.boha.receiver.services.FirebaseService;
 import com.boha.receiver.services.TOMLService;
 import com.boha.receiver.services.directpayments.DirectPaymentSenderService;
+import com.boha.receiver.services.directpayments.inforesponse.InfoResponse;
+import com.boha.receiver.services.directpayments.inforesponse.Receive;
+import com.boha.receiver.services.directpayments.inforesponse.ZARK;
+import com.boha.receiver.services.directpayments.txresponse.TransactionResponse;
 import com.boha.receiver.services.misc.NetService;
 import com.boha.receiver.transfer.sep10.AnchorSep10Challenge;
 import com.boha.receiver.transfer.sep10.ChallengeResponse;
 import com.boha.receiver.transfer.sep10.JWTToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.moandjiezana.toml.Toml;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -32,6 +38,7 @@ import java.util.Map;
 public class ReceiverController {
     public static final Logger LOGGER = LoggerFactory.getLogger(ReceiverController.class.getSimpleName());
     public static final String mm = E.HEART_GREEN+  E.HEART_GREEN +  E.HEART_GREEN + ReceiverAnchorApplication.class.getSimpleName() + " : ";
+    private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
 
     @Autowired
     private ApplicationContext context;
@@ -54,13 +61,37 @@ public class ReceiverController {
        LOGGER.info(c);
        return ResponseEntity.ok(new CustomMessage(200,c));
     }
+    @GetMapping(value = "/info", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object>  info() {
+        String c = mm+"Receiving Anchor getting info request: " + new DateTime().toDateTimeISO().toString();
+        LOGGER.info(c);
+        try {
+            Receive rec = new Receive();
+            ZARK ZARK = new ZARK();
+            ZARK.setEnabled(true);
+            ZARK.setMinAmount(10.00);
+            ZARK.setMaxAmount(10000.00);
+            ZARK.setSep12(null);
+            ZARK.setFeePercent(5.5);
+            ZARK.setFeeFixed(3.00);
+            ZARK.setSep12(null);
+            rec.setZARK(ZARK);
+            InfoResponse resp = new InfoResponse(rec);
+            LOGGER.info(E.LEAF+E.LEAF+G.toJson(resp));
+            return ResponseEntity.ok(G.toJson(resp));
+        } catch (Exception e) {
+            return ResponseEntity.ok(new CustomMessage(400, c));
+        }
+
+    }
     @GetMapping(value = "/.well-known/stellar.toml", produces = MediaType.TEXT_PLAIN_VALUE)
     public String  getWellKnown() throws Exception {
         String c = mm+"Dummy Anchor getWellKnown: " + new DateTime().toDateTimeISO().toString();
         LOGGER.info(c);
-        Toml toml = tomlService.getStellarToml();
+        String toml = tomlService.getStellarTOMLString();
         if (toml != null) {
-            return toml.toMap().toString();
+            LOGGER.info("\uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A well-known-toml: " + toml);
+            return toml;
         } else {
             throw new Exception("stellar.toml missing");
         }
@@ -77,6 +108,20 @@ public class ReceiverController {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(new CustomMessage(400,
                     "startAnchorConnection failed: " + e.getMessage()));
+        }
+
+    }
+    @PostMapping(value = "/transactions", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> transactions(@RequestBody Object object)  {
+        LOGGER.info(E.BROCCOLI + E.BROCCOLI + "startAnchorConnection transactions ..." + object);
+
+        try {
+            String res = " \uD83C\uDF51 \uD83C\uDF51 transactions endpoint : Still under construction";
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(new CustomMessage(400,
+                    "transactions failed: " + e.getMessage()));
         }
 
     }

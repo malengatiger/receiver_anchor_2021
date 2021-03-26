@@ -58,6 +58,8 @@ public class AnchorAuthenticationFilter extends OncePerRequestFilter {
         //todo - figure out how to secure the upload endpoints - maybe get auth token from firebaseAdmin sdk?
         if (url.contains("auth")
                 || url.contains("token")
+                || url.contains("info")
+                || url.contains(".well-known")
                 || url.contains("startAnchorConnection")
                 || url.contains("createAnchorAccounts")) {
             LOGGER.info(E.ANGRY + "this request is not subject to authentication: "
